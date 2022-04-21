@@ -1,0 +1,41 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="container col-md-6 mt-5 p-3 form-content">
+	<form method="POST" action="">
+		{{ form.hidden_tag() }}
+		<h5><b>Log In</b></h5>
+		<div class="divider"></div>
+		<div class="mb-3">
+			{{ form.email.label(class="form-label") }}
+			{% if form.email.errors %}
+				{{ form.email(class="form-control is-invalid") }}
+				<div class="invalid-feedback">
+					{% for error in form.email.errors %}
+						<span>{{ error }}</span>
+					{% endfor %}
+				</div>
+			{% else %}
+				{{ form.email(class="form-control") }}
+			{% endif %}
+		</div>
+		<div class="mb-3">
+			{{ form.password.label(class="form-label") }}
+			{{ form.password(class="form-control") }}
+		</div>
+		<div class="mb-3">
+			{{ form.remember_me(class="form-check-input") }}
+			{{ form.remember_me.label(class="form-check-label") }}
+		</div>	
+		<div class="mb-3">
+			{{ form.submit(class="btn button-style") }}
+		</div>
+	</form>
+</div>
+<div class="container col-md-6 mt-3">
+	<div class="divider">
+	</div>
+	<p class="text-muted">
+		Don't have an account? <a class="ml-2" href="{{ url_for('register') }}">Register</a>
+	</p>
+</div>
+{% endblock content %}
