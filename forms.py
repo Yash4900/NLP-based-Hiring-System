@@ -50,5 +50,6 @@ class UpdateProfileForm(FlaskForm):
 class AddJobForm(FlaskForm):
     role = StringField('Role', validators=[DataRequired()])
     job_desc = TextAreaField('Job Description', validators=[DataRequired()])
+    skills_required = TextAreaField('Skills Required', validators=[DataRequired()])
     deadline = DateField('Deadline', format='%Y-%m-%d')
     submit = SubmitField('Submit')

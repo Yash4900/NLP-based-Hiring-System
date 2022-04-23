@@ -11,6 +11,12 @@
 				{{ job.job_desc }}
 			</p>
 			<br/>
+			<h5><b>Skills Required</b></h5>
+			<div class="divider"></div>
+			<p class="text-muted f-18">
+				{{ job.skills_required }}
+			</p>
+			<br/>
 			<p class="f-18">Total applications - {{ num_applicants }}</p>	
 			<br/>
 			<p class="f-18">Last date to apply is <b> {{ job.deadline.strftime("%d %B, %Y") }}</b></p>

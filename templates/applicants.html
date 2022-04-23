@@ -4,7 +4,7 @@
 	<h4>Applicants - {{ job.role }}</h4>
 	<div class="divider"></div>
 	{% for applicant in applicants %}
-		<div class="applicant-tile row">
+		<div class="applicant-tile row my-4">
 			<div class="applicant-profile-pic col-md-2">
 				<img class="pic" src="{{ url_for('static', filename='profile_pictures/'+applicant['profile_picture']) }}" width="100%" height="100%" >
 			</div>

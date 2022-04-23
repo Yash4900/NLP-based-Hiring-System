@@ -1,5 +1,6 @@
 import os
 import time
+import datetime
 from PIL import Image
 from flask import Flask, url_for, render_template, flash, redirect, request
 from forms import RegisterForm, LoginForm, AddJobForm, UpdateProfileForm
@@ -52,12 +53,15 @@ class User(db.Model, UserMixin):
 class Job(db.Model):
 	id = db.Column(db.Integer, primary_key = True)
 	role = db.Column(db.String(60), nullable = False)
-	job_desc = db.Column(db.String(1500), nullable = False)
+	job_desc = db.Column(db.String(1200), nullable = False)
+	skills_required = db.Column(db.String(1200), nullable = False)
 	deadline = db.Column(db.DateTime, nullable = False)
 
 	def __repr__(self):
 		return f"Job({self.role})"
 
+
+# ROUTES
 
 @app.route('/')
 @app.route('/explore')
@@ -162,8 +166,9 @@ def account():
 	if request.method == 'GET':
 		form.email.data = current_user.email
 		form.age.data = current_user.age
+		applied_count = len(current_user.applied_at)
 	image_path = url_for('static', filename = 'profile_pictures/' + current_user.profile_picture)
-	return render_template('account.html', title = 'My Profile', image_path = image_path, form = form)
+	return render_template('account.html', title = 'My Profile', image_path = image_path, form = form, applied_count = applied_count)
 
 
 @app.route('/position/<int:job_id>')
@@ -216,17 +221,17 @@ def job_form():
 	if (current_user.is_admin == True):
 		form = AddJobForm()
 		if form.validate_on_submit():
-			job = Job(role = form.role.data, job_desc = form.job_desc.data, deadline = form.deadline.data)
+			job = Job(role = form.role.data, job_desc = form.job_desc.data, skills_required = form.skills_required.data, deadline = form.deadline.data)
 			db.session.add(job)
 			db.session.commit()
 
-			preprocessed = preprocess.preprocess_text(form.job_desc.data)
+			preprocessed = preprocess.preprocess_text(str(form.job_desc.data) + ' ' + str(form.skills_required.data))
 			txtfile = open(f"./static/jd_preprocessed/{job.id}.txt", "w")
 			txtfile.write(preprocessed)
 			txtfile.close()
 			
 			flash('New Position has been floated successfully!', 'success')
-		return render_template('job_form.html', title = 'Add new Job', form = form)
+		return render_template('new-position.html', title = 'Add new Job', form = form)
 	else:
 		return '<h2>Only admin can view this page</h2>'
 
@@ -239,6 +244,10 @@ def apply(job_id):
 	if (current_user.resume == ''):
 		flash('Please upload your resume in the profile section before applying', 'danger')
 		return redirect(url_for('position', job_id = job_id))
+	if (datetime.datetime.now() > job.deadline):
+		flash('Deadline has already been passed!', 'danger')
+		return redirect(url_for('position', job_id = job_id))
+	
 	user = User.query.get(current_user.id)
 	job = Job.query.get(job_id)
 	user.applied_at.append(job)
