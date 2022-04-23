@@ -1,4 +1,73 @@
 {% extends 'layout.html' %}
 {% block content %}
+<div class="container col-md-6 profile-content shadow-sm mt-5 p-3">
+	<h4><b>Account Info</b></h4>
+	<div class="divider"></div>
+	<div class="profile">
+		<div class="profile-pic">
+			<img class="pic" src="{{ image_path }}" width="100%" height="100%" >
+		</div>
+		<div class="profile-info py-2 px-4">
+			<h3><b>{{ current_user.full_name }}</b></h3>
+			<p class="text-muted">{{ current_user.email }}</p>
+			{% if current_user.resume == '' %}
+				<p>Resume missing!</p>
+			{% else %}
+				<a id="view-resume" target="_blank" href="{{ url_for('static', filename='resumes/' + current_user.resume) }}">View Resume</a>
+			{% endif %}
+		</div>
+	</div>
+	<div id="edit-details" class="mt-3">
+		<h4><b>Edit Profile</b></h4>
+		<div class="divider"></div>
+		<form method="POST" action="" enctype="multipart/form-data">
+			{{ form.hidden_tag() }}
+			<div class="mb-3 row">
+				<div class="col-md-8">
+					{{ form.email.label(class="form-label") }}
+					{% if form.email.errors %}
+						{{ form.email(class="form-control is-invalid") }}
+						<div class="invalid-feedback">
+							{% for error in form.email.errors %}
+								<span>{{ error }}</span>
+							{% endfor %}
+						</div>
+					{% else %}
+						{{ form.email(class="form-control") }}
+					{% endif %}
+				</div>
+				<div class="col-md-4">
+					{{ form.age.label(class="form-label") }}
+					{{ form.age(class="form-control") }}
+				</div>
+			</div>
+			<div class="mb-3">
+				{{ form.profile_picture.label() }}
+				</br>
+				{{ form.profile_picture(class="form-control-file") }}
+				{% if form.profile_picture.errors %}
+					</br>
+					{% for error in form.profile_picture.errors %}
+						<span class="text-danger">{{ error }}</span>
+					{% endfor %}
+				{% endif %}
+			</div>
+			<div class="mb-3">
+				{{ form.resume.label() }}
+				</br>
+				{{ form.resume(class="form-control-file") }}
+				{% if form.resume.errors %}
+					</br>
+					{% for error in form.resume.errors %}
+						<span class="text-danger">{{ error }}</span>
+					{% endfor %}
+				{% endif %}
+			</div>
+			<div class="mb-3">
+				{{ form.update(class="btn button-style") }}
+			</div>
+		</form>
+	</div>
+</div>
 
 {% endblock content %}

@@ -1,8 +1,15 @@
+import os
+import time
+from PIL import Image
 from flask import Flask, url_for, render_template, flash, redirect, request
-from forms import RegisterForm, LoginForm
+from forms import RegisterForm, LoginForm, AddJobForm, UpdateProfileForm
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager, UserMixin, login_user, logout_user, current_user, login_required
+from numpy import dot
+from numpy.linalg import norm
+import preprocess
+import vectorizer
 
 app = Flask(__name__)
 
@@ -19,26 +26,50 @@ login_manager.login_message_category = 'primary'
 def load_user(user_id):
 	return User.query.get(int(user_id))
 
+# Association table
+user_job = db.Table('user_job',
+	db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
+	db.Column('job_id', db.Integer, db.ForeignKey('job.id'))
+)
+
 # User Model
 class User(db.Model, UserMixin):
 	id = db.Column(db.Integer, primary_key = True)
 	full_name = db.Column(db.String(40), nullable = False)
 	email = db.Column(db.String(50), unique = True, nullable = False)
 	age = db.Column(db.Integer, nullable = False)
-	profile_picture = db.Column(db.String(30), nullable = False, default = 'default.jpg')
+	profile_picture = db.Column(db.String(30), nullable = False, default = 'default.png')
+	resume = db.Column(db.String(30), nullable = False, default = '')
 	password = db.Column(db.String(60), nullable = False)
+	is_admin = db.Column(db.Boolean, nullable = False, default = False)
+	applied_at = db.relationship('Job', secondary = user_job, backref = 'applicants')
 
 	def __repr__(self):
 		return f"User({self.full_name}, {self.email}, {self.age})"
 
 
+# Job Model
+class Job(db.Model):
+	id = db.Column(db.Integer, primary_key = True)
+	role = db.Column(db.String(60), nullable = False)
+	job_desc = db.Column(db.String(1500), nullable = False)
+	deadline = db.Column(db.DateTime, nullable = False)
+
+	def __repr__(self):
+		return f"Job({self.role})"
+
+
 @app.route('/')
-@app.route('/home')
-def home():
-    return render_template('home.html')
+@app.route('/explore')
+def explore():
+	jobs = Job.query.all()
+	return render_template('explore.html', title='Explore', jobs=jobs)
+
 
 @app.route('/register', methods = ['GET', 'POST'])
 def register():
+	if (current_user.is_authenticated):
+		return redirect(url_for('explore')) 
 	form = RegisterForm()
 	if (form.validate_on_submit()):
 		user = User.query.filter_by(email = form.email.data).first()
@@ -54,8 +85,11 @@ def register():
 
 	return render_template('register.html', title = 'Register', form = form)
 
+
 @app.route('/login', methods = ['GET', 'POST'])
 def login():
+	if (current_user.is_authenticated):
+		return redirect(url_for('explore')) 
 	form = LoginForm()
 	if (form.validate_on_submit()):
 		user = User.query.filter_by(email = form.email.data).first()
@@ -65,7 +99,7 @@ def login():
 			if page:
 				return redirect(page)
 			else:
-				return redirect(url_for('home'))
+				return redirect(url_for('explore'))
 		flash('Invalid Credentials! Please make sure that you have entered correct email and password', 'danger')
 	return render_template('login.html', title = 'Login', form = form)
 
@@ -74,10 +108,144 @@ def logout():
 	logout_user()
 	return redirect(url_for('login'))
 
-@app.route('/account')
+
+def save_profile_pic(picture):
+	file_name = str(int(time.time()))
+	_, file_ext = os.path.splitext(picture.filename)
+	file_name = file_name + file_ext
+	path = os.path.join(app.root_path, 'static/profile_pictures', file_name)
+	
+	compressed = Image.open(picture)
+	compressed.thumbnail((200, 200))
+	compressed.save(path)
+
+	return file_name
+
+def save_resume(resume):
+	file_name = str(int(time.time()))
+	_, file_ext = os.path.splitext(resume.filename)
+	name = file_name + file_ext
+	path = os.path.join(app.root_path, 'static/resumes', name)
+	
+	resume.save(path)
+
+	return file_name
+
+@app.route('/account', methods = ['GET', 'POST'])
 @login_required
 def account():
-	return render_template('account.html', title = 'My Profile')
+	form = UpdateProfileForm()
+	if form.validate_on_submit():
+		email_unique = True
+		if form.email.data != current_user.email:
+			user = User.query.filter_by(email = form.email.data).first()
+			if (user):
+				email_unique = False
+				flash('An account already exists for the entered email!', 'danger')
+		if (email_unique):
+			if form.profile_picture.data:
+				file_name = save_profile_pic(form.profile_picture.data)
+				current_user.profile_picture = file_name
+			if form.resume.data:
+				file_name = save_resume(form.resume.data)
+
+				preprocessed = preprocess.preprocess_file(file_name + '.pdf')
+				txtfile = open(f"./static/resume_preprocessed/{file_name}.txt", "w")
+				txtfile.write(preprocessed)
+				txtfile.close()
+
+				current_user.resume = file_name + '.pdf'
+			db.session.commit()
+			flash('Your profile was updated successfully', 'success')
+			return redirect(url_for('account'))
+
+	if request.method == 'GET':
+		form.email.data = current_user.email
+		form.age.data = current_user.age
+	image_path = url_for('static', filename = 'profile_pictures/' + current_user.profile_picture)
+	return render_template('account.html', title = 'My Profile', image_path = image_path, form = form)
+
+
+@app.route('/position/<int:job_id>')
+def position(job_id):
+	job = Job.query.get(job_id)
+	num_applicants = len(job.applicants)
+	return render_template('job-details.html', title = job.role, job = job, num_applicants = num_applicants)
+
+
+def cosine_similarity(x, y):
+	return dot(x,y) / (norm(x) * norm(y))
+
+@app.route('/applicants/<int:job_id>')
+@login_required
+def applicants(job_id):
+	job = Job.query.get(job_id)
+	applicants = job.applicants
+
+	docs = []
+	for applicant in applicants:
+		filename = applicant.resume.split('.')[0]
+		with open(f"./static/resume_preprocessed/{filename}.txt", "r") as f:
+			docs.append(f.readlines()[0])
+
+	with open(f"./static/jd_preprocessed/{job.id}.txt", "r") as f:
+			docs.append(f.readlines()[0])
+
+	vectors = vectorizer.get_tfidf(docs)
+	n = len(vectors)
+
+	applicants_list = []
+	for index, applicant in enumerate(applicants):
+		dictionary = {
+			'id': applicant.id,
+			'name': applicant.full_name,
+			'age': applicant.age,
+			'email': applicant.email,
+			'profile_picture': applicant.profile_picture,
+			'resume': applicant.resume,
+			'strength': int(cosine_similarity(vectors[index], vectors[n-1]) * 100)
+		}
+		print(dictionary['strength'])
+		applicants_list.append(dictionary)
+
+	return render_template('applicants.html', applicants = applicants_list, job = job)
+
+@app.route('/job-form', methods = ['GET', 'POST'])
+@login_required
+def job_form():
+	if (current_user.is_admin == True):
+		form = AddJobForm()
+		if form.validate_on_submit():
+			job = Job(role = form.role.data, job_desc = form.job_desc.data, deadline = form.deadline.data)
+			db.session.add(job)
+			db.session.commit()
+
+			preprocessed = preprocess.preprocess_text(form.job_desc.data)
+			txtfile = open(f"./static/jd_preprocessed/{job.id}.txt", "w")
+			txtfile.write(preprocessed)
+			txtfile.close()
+			
+			flash('New Position has been floated successfully!', 'success')
+		return render_template('job_form.html', title = 'Add new Job', form = form)
+	else:
+		return '<h2>Only admin can view this page</h2>'
+
+
+@app.route('/apply/<job_id>', methods=['GET', 'POST'])
+@login_required
+def apply(job_id):
+	if (request.method == 'GET'):
+		return redirect(url_for('position', job_id = job_id))
+	if (current_user.resume == ''):
+		flash('Please upload your resume in the profile section before applying', 'danger')
+		return redirect(url_for('position', job_id = job_id))
+	user = User.query.get(current_user.id)
+	job = Job.query.get(job_id)
+	user.applied_at.append(job)
+	db.session.commit()
+	flash(f'You have successfully applied for {job.role} position!', 'success')
+	return redirect(url_for('explore'))
+
 
 if (__name__ == '__main__'):
 	app.run(debug = True)

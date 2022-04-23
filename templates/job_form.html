@@ -1,0 +1,26 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="container col-md-6 mt-5 p-3 form-content">
+	<form method="POST" action="">
+		{{ form.hidden_tag() }}
+		<h5><b>Add New Position</b></h5>
+		<div class="divider"></div>
+		<div class="mb-3">
+			{{ form.role.label(class="form-label") }}
+			{{ form.role(class="form-control") }}
+		</div>	
+		<div class="mb-3">
+			{{ form.job_desc.label(class="form-label") }}
+			{{ form.job_desc(class="form-control", rows="8") }}
+		</div>
+		<div class="mb-3">
+			{{ form.deadline.label(class="form-label") }}
+			{{ form.deadline(class="form-control") }}
+		</div>
+		<div class="mb-3">
+			{{ form.submit(class="btn button-style") }}
+		</div>
+	</form>
+</div>
+
+{% endblock content %}
