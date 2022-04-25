@@ -179,7 +179,11 @@ def account():
 def position(job_id):
 	job = Job.query.get(job_id)
 	num_applicants = len(job.applicants)
-	return render_template('job-details.html', title = job.role, job = job, num_applicants = num_applicants)
+	if current_user.is_authenticated and job in current_user.applied_at:
+		status = db.session.query(user_job).filter_by(user_id = current_user.id, job_id = job_id).first().status
+	else:
+		status = None
+	return render_template('job-details.html', title = job.role, job = job, num_applicants = num_applicants, status = status)
 
 
 def cosine_similarity(x, y):
@@ -208,6 +212,14 @@ def applicants(job_id):
 		applicants_list.append(dictionary)
 
 	return render_template('applicants.html', applicants = applicants_list, job = job)
+
+@app.route('/shortlist/<int:job_id>', methods = ['POST'])
+def shortlist(job_id):
+	if (request.method == 'POST'):
+		user_id = int(request.form.get('hid'))
+		db.session.query(user_job).filter_by(user_id = user_id, job_id = job_id).update(dict(status='Shortlisted'))
+		db.session.commit()
+	return redirect(url_for('applicants', job_id = job_id))
 
 @app.route('/job-form', methods = ['GET', 'POST'])
 @login_required

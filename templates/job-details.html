@@ -7,23 +7,19 @@
 			<br/>
 			<h5><b>Job Description</b></h5>
 			<div class="divider"></div>
-			<p class="text-muted f-18">
+			<p class="f-18">
 				{{ job.job_desc }}
 			</p>
 			<br/>
 			<h5><b>Skills Required</b></h5>
 			<div class="divider"></div>
-			<p class="text-muted f-18">
+			<p class="f-18">
 				{{ job.skills_required }}
 			</p>
 			<br/>
 			<p class="f-18">Salary - <b>{{ job.salary }}</b></p>	
 			<p class="f-18">Total applications - <b>{{ num_applicants }}</b></p>	
 			<p class="f-18">Last date to apply is <b> {{ job.deadline.strftime("%d %B, %Y") }}</b></p>
-			{% if current_user in job.applicants %}
-				<br/>
-				<h6>You have already applied for this job! You will receive an email for the interview if we find your resume satisfying.</h6>
-			{% endif %}
 		</div>
 		<div class="col-md-4">
 			{% if current_user.is_admin == True %}
@@ -33,6 +29,9 @@
 					<button class="btn button-style" data-bs-toggle="modal" data-bs-target="#applyModal">
 						Apply Now
 					</button>
+				{% else %}
+					<h5>You have already applied for this position!</h5>
+					<h5>Application Status - {{ status }}</h5>
 				{% endif %}
 			{% endif %}
 		</div>
