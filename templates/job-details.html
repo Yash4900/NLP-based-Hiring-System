@@ -17,8 +17,8 @@
 				{{ job.skills_required }}
 			</p>
 			<br/>
-			<p class="f-18">Total applications - {{ num_applicants }}</p>	
-			<br/>
+			<p class="f-18">Salary - <b>{{ job.salary }}</b></p>	
+			<p class="f-18">Total applications - <b>{{ num_applicants }}</b></p>	
 			<p class="f-18">Last date to apply is <b> {{ job.deadline.strftime("%d %B, %Y") }}</b></p>
 			{% if current_user in job.applicants %}
 				<br/>
@@ -44,11 +44,11 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="applyModalLabel"><b>Alert!</b></h5>
+        <h5 class="modal-title" id="applyModalLabel"><b>Are you sure you want to apply for this role?</b></h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        Are you sure you want to apply for this role?
+         Your current resume will be evaluated for shortlisting. Please make sure you to check your resume before proceeding.
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>

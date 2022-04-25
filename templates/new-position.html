@@ -1,6 +1,6 @@
 {% extends 'layout.html' %}
 {% block content %}
-<div class="container col-md-6 mt-5 p-3 form-content">
+<div class="container col-md-6 mt-5 p-3 shadow-sm form-content">
 	<form method="POST" action="">
 		{{ form.hidden_tag() }}
 		<h5><b>Add New Position</b></h5>
@@ -11,11 +11,15 @@
 		</div>	
 		<div class="mb-3">
 			{{ form.job_desc.label(class="form-label") }}
-			{{ form.job_desc(class="form-control", rows="8") }}
+			{{ form.job_desc(class="form-control", rows="7") }}
 		</div>
 		<div class="mb-3">
 			{{ form.skills_required.label(class="form-label") }}
-			{{ form.skills_required(class="form-control", rows="8") }}
+			{{ form.skills_required(class="form-control", rows="7") }}
+		</div>
+		<div class="mb-3">
+			{{ form.salary.label(class="form-label") }}
+			{{ form.salary(class="form-control") }}
 		</div>
 		<div class="mb-3">
 			{{ form.deadline.label(class="form-label") }}

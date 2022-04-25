@@ -30,7 +30,9 @@ def load_user(user_id):
 # Association table
 user_job = db.Table('user_job',
 	db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
-	db.Column('job_id', db.Integer, db.ForeignKey('job.id'))
+	db.Column('job_id', db.Integer, db.ForeignKey('job.id')),
+	db.Column('match', db.Integer, default = 0),
+	db.Column('status', db.String(20), default = 'Pending')
 )
 
 # User Model
@@ -55,7 +57,9 @@ class Job(db.Model):
 	role = db.Column(db.String(60), nullable = False)
 	job_desc = db.Column(db.String(1200), nullable = False)
 	skills_required = db.Column(db.String(1200), nullable = False)
+	salary = db.Column(db.String(30), nullable = False)
 	deadline = db.Column(db.DateTime, nullable = False)
+	posted_on = db.Column(db.DateTime, nullable = False, default = datetime.datetime.now())
 
 	def __repr__(self):
 		return f"Job({self.role})"
@@ -187,20 +191,9 @@ def applicants(job_id):
 	job = Job.query.get(job_id)
 	applicants = job.applicants
 
-	docs = []
-	for applicant in applicants:
-		filename = applicant.resume.split('.')[0]
-		with open(f"./static/resume_preprocessed/{filename}.txt", "r") as f:
-			docs.append(f.readlines()[0])
-
-	with open(f"./static/jd_preprocessed/{job.id}.txt", "r") as f:
-			docs.append(f.readlines()[0])
-
-	vectors = vectorizer.get_tfidf(docs)
-	n = len(vectors)
-
 	applicants_list = []
 	for index, applicant in enumerate(applicants):
+		user_job_row = db.session.query(user_job).filter_by(user_id = applicant.id, job_id = job_id).first()
 		dictionary = {
 			'id': applicant.id,
 			'name': applicant.full_name,
@@ -208,7 +201,8 @@ def applicants(job_id):
 			'email': applicant.email,
 			'profile_picture': applicant.profile_picture,
 			'resume': applicant.resume,
-			'strength': int(cosine_similarity(vectors[index], vectors[n-1]) * 100)
+			'strength': user_job_row.match,
+			'status': user_job_row.status
 		}
 		print(dictionary['strength'])
 		applicants_list.append(dictionary)
@@ -221,7 +215,7 @@ def job_form():
 	if (current_user.is_admin == True):
 		form = AddJobForm()
 		if form.validate_on_submit():
-			job = Job(role = form.role.data, job_desc = form.job_desc.data, skills_required = form.skills_required.data, deadline = form.deadline.data)
+			job = Job(role = form.role.data, job_desc = form.job_desc.data, skills_required = form.skills_required.data, salary = form.salary.data, deadline = form.deadline.data)
 			db.session.add(job)
 			db.session.commit()
 
@@ -244,14 +238,31 @@ def apply(job_id):
 	if (current_user.resume == ''):
 		flash('Please upload your resume in the profile section before applying', 'danger')
 		return redirect(url_for('position', job_id = job_id))
-	if (datetime.datetime.now() > job.deadline):
-		flash('Deadline has already been passed!', 'danger')
-		return redirect(url_for('position', job_id = job_id))
 	
 	user = User.query.get(current_user.id)
 	job = Job.query.get(job_id)
+
+	if (datetime.datetime.now() > job.deadline):
+		flash('Deadline has already been passed!', 'danger')
+		return redirect(url_for('position', job_id = job_id))
+
 	user.applied_at.append(job)
 	db.session.commit()
+
+	docs = []
+	filename = user.resume.split('.')[0]
+	with open(f"./static/resume_preprocessed/{filename}.txt", "r") as f:
+		docs.append(f.readlines()[0])
+
+	with open(f"./static/jd_preprocessed/{job_id}.txt", "r") as f:
+		docs.append(f.readlines()[0])
+
+	vectors = vectorizer.get_tfidf(docs)
+	similarity = int(cosine_similarity(vectors[0], vectors[1]) * 100)
+
+	db.session.query(user_job).filter_by(user_id = user.id, job_id = job_id).update(dict(match=similarity))
+	db.session.commit()
+
 	flash(f'You have successfully applied for {job.role} position!', 'success')
 	return redirect(url_for('explore'))
 

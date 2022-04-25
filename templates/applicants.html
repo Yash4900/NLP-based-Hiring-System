@@ -1,23 +1,31 @@
 {% extends 'layout.html' %}
 {% block content %}
-<div class="container bg-white p-3 col-md-6">
-	<h4>Applicants - {{ job.role }}</h4>
+<div class="container bg-white p-3 col-md-8">
+	<h4>Applications - {{ job.role }}</h4>
 	<div class="divider"></div>
+	<b><div class="row f-18 bg-light">
+		<div class="col-md-6">Candidate Info</div>
+		<div class="col-md-3">Profile Match</div>
+		<div class="col-md-3">Status</div>
+	</div></b>
 	{% for applicant in applicants %}
 		<div class="applicant-tile row my-4">
 			<div class="applicant-profile-pic col-md-2">
-				<img class="pic" src="{{ url_for('static', filename='profile_pictures/'+applicant['profile_picture']) }}" width="100%" height="100%" >
+				<img class="pic" src="{{ url_for('static', filename='profile_pictures/'+applicant['profile_picture']) }}" width="120px" >
 			</div>
-			<div class="applicant-info col-md-6">
+			<div class="applicant-info col-md-4">
 				<h5><b>{{ applicant['name'] }}</b></h5>
 				<p class="text-muted">{{ applicant['email'] }} - {{ applicant['age'] }}</p>
 				<a id="view-resume" target="_blank" href="{{ url_for('static', filename='resumes/' + applicant['resume']) }}">View Resume</a>
 			</div>
-			<div class="col-md-4">
-				<div class="progress-bar">
+			<div class="col-md-3">
+				<div class="progress-bar mt-2">
 					<div class="strength" style="width:{{applicant['strength']}}%;"></div>
 				</div>
 				<p>{{applicant['strength']}} %</p>
+			</div>
+			<div class="col-md-3">
+				{{ applicant['status'] }}
 			</div>
 		</div>
 	{% endfor %}

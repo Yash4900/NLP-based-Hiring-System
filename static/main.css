@@ -11,8 +11,8 @@ body {
 }
 
 .nav-color {
-	/*background-color: #5f788a;*/
-	background-color: #087990;
+	background-color: #5f788a;
+	/*background-color: #087990;*/
 }
 
 .navbar-brand, .navbar-nav .nav-link {
@@ -26,7 +26,7 @@ body {
 }
 
 .button-style {
-	background-color: #087990;
+	background-color: #5f788a;
 	color: #ffffff;
     font-weight: 600;
 }
@@ -113,7 +113,7 @@ body {
 }
 
 .strength {
-	background-color: #087990;
+	background-color: #5f788a;
 	height: 100%;
 }
 
