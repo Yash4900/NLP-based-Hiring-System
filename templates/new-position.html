@@ -18,12 +18,18 @@
 			{{ form.skills_required(class="form-control", rows="7") }}
 		</div>
 		<div class="mb-3">
-			{{ form.salary.label(class="form-label") }}
-			{{ form.salary(class="form-control") }}
+			{{ form.work_location.label(class="form-label") }}
+			{{ form.work_location(class="form-control") }}
 		</div>
 		<div class="mb-3">
-			{{ form.deadline.label(class="form-label") }}
-			{{ form.deadline(class="form-control") }}
+			<div class="col-md-6">
+				{{ form.salary.label(class="form-label") }}
+				{{ form.salary(class="form-control") }}
+			</div>
+			<div class="col-md-6">
+				{{ form.deadline.label(class="form-label") }}
+				{{ form.deadline(class="form-control") }}
+			</div>
 		</div>
 		<div class="mb-3">
 			{{ form.submit(class="btn button-style") }}

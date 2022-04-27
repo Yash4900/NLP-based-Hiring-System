@@ -1,60 +1,78 @@
 {% extends 'layout.html' %}
 {% block content %}
-<div class="container col-md-6 mt-5 p-3 form-content">
-	<form method="POST" action="">
-		{{ form.hidden_tag() }}
-		<h5><b>Register Now</b></h5>
-		<div class="divider"></div>
-		<div class="mb-3">
-			{{ form.full_name.label(class="form-label") }}
-			{{ form.full_name(class="form-control") }}
-		</div>	
-		<div class="mb-3 row">
-			<div class="col-md-8">
-				{{ form.email.label(class="form-label") }}
-				{% if form.email.errors %}
-					{{ form.email(class="form-control is-invalid") }}
+<div class="container row col-md-10 offset-md-1">
+	<div class="col-md-6 image">
+		<img src="{{ url_for('static', filename='images/register.svg') }}" width="70%">
+	</div>
+	<div class="container col-md-6 mt-5 p-3 shadow-sm form-content">
+		<form method="POST" action="">
+			{{ form.hidden_tag() }}
+			<h5><b>Register Now</b></h5>
+			<div class="divider"></div>
+			<div class="mb-3 row">
+				<div class="col-md-8">
+					{{ form.full_name.label(class="form-label") }}
+					{{ form.full_name(class="form-control") }}
+				</div>
+				<div class="col-md-4">
+					{{ form.age.label(class="form-label") }}
+					{{ form.age(class="form-control") }}
+				</div>
+			</div>	
+			<div class="mb-3 row">
+				<div class="col-md-6">
+					{{ form.email.label(class="form-label") }}
+					{% if form.email.errors %}
+						{{ form.email(class="form-control is-invalid", placeholder="example@email.com") }}
+						<div class="invalid-feedback">
+							{% for error in form.email.errors %}
+								<span>{{ error }}</span>
+							{% endfor %}
+						</div>
+					{% else %}
+						{{ form.email(class="form-control", placeholder="example@email.com") }}
+					{% endif %}
+				</div>
+				<div class="col-md-6">
+					{{ form.phone.label(class="form-label") }}
+					{% if form.phone.errors %}
+						{{ form.phone(class="form-control is-invalid") }}
+						<div class="invalid-feedback">
+							{% for error in form.phone.errors %}
+								<span>{{ error }}</span>
+							{% endfor %}
+						</div>
+					{% else %}
+						{{ form.phone(class="form-control") }}
+					{% endif %}
+				</div>
+			</div>
+			<div class="mb-3">
+				{{ form.password.label(class="form-label") }}
+				{{ form.password(class="form-control") }}
+			</div>
+			<div class="mb-3">
+				{{ form.confirm_password.label(class="form-label") }}
+				{% if form.confirm_password.errors %}
+					{{ form.confirm_password(class="form-control is-invalid") }}
 					<div class="invalid-feedback">
-						{% for error in form.email.errors %}
+						{% for error in form.confirm_password.errors %}
 							<span>{{ error }}</span>
 						{% endfor %}
 					</div>
 				{% else %}
-					{{ form.email(class="form-control") }}
+					{{ form.confirm_password(class="form-control") }}
 				{% endif %}
 			</div>
-			<div class="col-md-4">
-				{{ form.age.label(class="form-label") }}
-				{{ form.age(class="form-control") }}
+			<div class="mb-3">
+				{{ form.submit(class="btn button-style") }}
 			</div>
+		</form>
+		<div class="divider">
 		</div>
-		<div class="mb-3">
-			{{ form.password.label(class="form-label") }}
-			{{ form.password(class="form-control") }}
-		</div>
-		<div class="mb-3">
-			{{ form.confirm_password.label(class="form-label") }}
-			{% if form.confirm_password.errors %}
-				{{ form.confirm_password(class="form-control is-invalid") }}
-				<div class="invalid-feedback">
-					{% for error in form.confirm_password.errors %}
-						<span>{{ error }}</span>
-					{% endfor %}
-				</div>
-			{% else %}
-				{{ form.confirm_password(class="form-control") }}
-			{% endif %}
-		</div>
-		<div class="mb-3">
-			{{ form.submit(class="btn button-style") }}
-		</div>
-	</form>
-</div>
-<div class="container col-md-6 mt-3">
-	<div class="divider">
+		<p class="text-muted w-500">
+			Already have an account? <a class="ml-2" href="{{ url_for('login') }}">Login</a>
+		</p>
 	</div>
-	<p class="text-muted">
-		Already have an account? <a class="ml-2" href="{{ url_for('login') }}">Login</a>
-	</p>
 </div>
 {% endblock content %}

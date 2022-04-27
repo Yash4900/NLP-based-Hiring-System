@@ -39,8 +39,9 @@ user_job = db.Table('user_job',
 class User(db.Model, UserMixin):
 	id = db.Column(db.Integer, primary_key = True)
 	full_name = db.Column(db.String(40), nullable = False)
-	email = db.Column(db.String(50), unique = True, nullable = False)
 	age = db.Column(db.Integer, nullable = False)
+	email = db.Column(db.String(50), unique = True, nullable = False)
+	phone = db.Column(db.String(15), nullable = False)
 	profile_picture = db.Column(db.String(30), nullable = False, default = 'default.png')
 	resume = db.Column(db.String(30), nullable = False, default = '')
 	password = db.Column(db.String(60), nullable = False)
@@ -55,8 +56,9 @@ class User(db.Model, UserMixin):
 class Job(db.Model):
 	id = db.Column(db.Integer, primary_key = True)
 	role = db.Column(db.String(60), nullable = False)
-	job_desc = db.Column(db.String(1200), nullable = False)
-	skills_required = db.Column(db.String(1200), nullable = False)
+	job_desc = db.Column(db.Text, nullable = False)
+	skills_required = db.Column(db.Text, nullable = False)
+	work_location = db.Column(db.String(60), nullable = False)
 	salary = db.Column(db.String(30), nullable = False)
 	deadline = db.Column(db.DateTime, nullable = False)
 	posted_on = db.Column(db.DateTime, nullable = False, default = datetime.datetime.now())
@@ -85,7 +87,7 @@ def register():
 			flash('An account already exists for the entered email!', 'danger')
 		else:
 			hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
-			user = User(full_name = form.full_name.data, email = form.email.data, age = form.age.data, password = hashed_password)
+			user = User(full_name = form.full_name.data, email = form.email.data, phone = form.phone.data, age = form.age.data, password = hashed_password)
 			db.session.add(user)
 			db.session.commit()
 			flash('Your account has been created successfully!', 'success')
@@ -150,7 +152,11 @@ def account():
 			if (user):
 				email_unique = False
 				flash('An account already exists for the entered email!', 'danger')
+			else:
+				current_user.email = form.email.data
 		if (email_unique):
+			if form.phone.data != current_user.phone:
+				current_user.phone = form.phone.data
 			if form.profile_picture.data:
 				file_name = save_profile_pic(form.profile_picture.data)
 				current_user.profile_picture = file_name
@@ -170,10 +176,16 @@ def account():
 	if request.method == 'GET':
 		form.email.data = current_user.email
 		form.age.data = current_user.age
+		form.phone.data = current_user.phone
 		applied_count = len(current_user.applied_at)
 	image_path = url_for('static', filename = 'profile_pictures/' + current_user.profile_picture)
 	return render_template('account.html', title = 'My Profile', image_path = image_path, form = form, applied_count = applied_count)
 
+@app.route('/applications/<int:user_id>')
+@login_required
+def applications(user_id):
+	jobs = current_user.applied_at
+	return render_template('explore.html', title='My Applications', jobs=jobs)
 
 @app.route('/position/<int:job_id>')
 def position(job_id):
@@ -227,7 +239,7 @@ def job_form():
 	if (current_user.is_admin == True):
 		form = AddJobForm()
 		if form.validate_on_submit():
-			job = Job(role = form.role.data, job_desc = form.job_desc.data, skills_required = form.skills_required.data, salary = form.salary.data, deadline = form.deadline.data)
+			job = Job(role = form.role.data, job_desc = form.job_desc.data, skills_required = form.skills_required.data, work_location = form.work_location.data, salary = form.salary.data, deadline = form.deadline.data)
 			db.session.add(job)
 			db.session.commit()
 

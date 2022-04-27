@@ -31,7 +31,17 @@
 					</button>
 				{% else %}
 					<h5>You have already applied for this position!</h5>
-					<h5>Application Status - {{ status }}</h5>
+					<br/>
+					<br/>
+					<div class="status">
+						{% if status == 'Shortlisted' %}
+							<img src="{{ url_for('static', filename='images/success.svg') }}" width="80%">
+							<p class="f-18"><b>Congratulations!! You are shortlisted for this position.</b></p>
+						{% else %}
+							<img src="{{ url_for('static', filename='images/pending.svg') }}" width="80%">
+							<p class="f-18"><b>Your application is under evaluation!</b></p>
+						{% endif %}
+					</div>
 				{% endif %}
 			{% endif %}
 		</div>

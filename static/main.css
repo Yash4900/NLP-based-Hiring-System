@@ -3,6 +3,7 @@
 body {
 	background-color: #fafafa;
 	font-family: 'Source Sans Pro', sans-serif;
+	/*font-family: 'Nunito Sans', sans-serif;*/
 }
 
 .nav-content {
@@ -119,4 +120,14 @@ body {
 
 .your-applications {
 	border-left: 1px solid #eeeeee;
+}
+
+.status, .image {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+}
+
+.w-500 {
+	font-weight: 500;
 }
