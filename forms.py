@@ -71,3 +71,9 @@ class AddJobForm(FlaskForm):
     salary = StringField('Salary', validators=[DataRequired()])
     deadline = DateField('Deadline', format='%Y-%m-%d')
     submit = SubmitField('Submit')
+
+class ChangePasswordForm(FlaskForm):
+    old_password = PasswordField('Old Password', validators=[DataRequired()])
+    new_password = PasswordField('New Password', validators=[DataRequired(), Length(min = 6)])
+    confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('new_password')])
+    change_password = SubmitField('Change Password')

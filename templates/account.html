@@ -1,89 +1,103 @@
 {% extends 'layout.html' %}
 {% block content %}
-<div class="container col-md-6 profile-content shadow-sm mt-5 p-3">
-	<h5><i class="fa-regular fa-user"></i> <b>Account Info</b></h5>
-	<div class="divider"></div>
-	<div class="profile">
-		<div class="profile-pic">
-			<img class="pic" src="{{ image_path }}" width="100%" >
+<div class="container col-md-8 offset-md-2 mt-5 row">
+	<div class="col-md-3 menu">
+		<div class="menu-item p-2 menu-item-active">
+			<i class="bi bi-person"></i> &nbsp; <a class="link-active" href="{{ url_for('account') }}">Account Details</a>
 		</div>
-		<div class="profile-info py-2 px-4">
-			<h3><b>{{ current_user.full_name }}</b></h3>
-			<i class="fa-regular fa-envelope"></i> &nbsp; <span class="text-muted">{{ current_user.email }}</span>
-			&nbsp;&nbsp;&nbsp;
-			<i class="fa-solid fa-mobile-retro"></i> &nbsp; <span class="text-muted">{{ current_user.phone }}</span>
-			<br/>
-			<br/>
-			{% if current_user.resume == '' %}
-				<p>Resume missing!</p>
-			{% else %}
-				<a id="view-resume" target="_blank" href="{{ url_for('static', filename='resumes/' + current_user.resume) }}">View Resume</a>
-			{% endif %}
+		<div class="menu-item p-2">
+			<i class="bi bi-file-earmark-text"></i> &nbsp; <a class="link-inactive" href="{{ url_for('applications', user_id = current_user.id) }}">My Applications</a>
+		</div>
+		<div class="menu-item p-2">
+			<i class="bi bi-key"></i> &nbsp; <a class="link-inactive" href="{{ url_for('change_password') }}">Change Password</a>
+		</div>
+		<div class="menu-item p-2">
+			<i class="bi bi-box-arrow-right"></i> &nbsp; <a class="link-inactive" href="{{ url_for('logout') }}">Logout</a>
 		</div>
 	</div>
-	<div id="edit-details" class="mt-4">
-		<h5> <i class="fa-regular fa-pen-to-square"></i> <b>Edit Profile</b></h5>
-		<div class="divider"></div>
-		<form method="POST" action="" enctype="multipart/form-data">
-			{{ form.hidden_tag() }}
-			<div class="mb-3 row">
-				<div class="col-md-8">
-					{{ form.email.label(class="form-label") }}
-					{% if form.email.errors %}
-						{{ form.email(class="form-control is-invalid") }}
+	<div class="col-md-9 profile-content shadow-sm p-3"> 	
+ 		<div class="profile">
+			<div class="profile-pic">
+				<img class="pic" src="{{ image_path }}" width="100%" >
+			</div>
+			<div class="profile-info py-2 px-4">
+				<h3><b>{{ current_user.full_name }}</b></h3>
+				<i class="bi bi-envelope"></i> &nbsp; <span class="sec-text">{{ current_user.email }}</span>
+				&nbsp;&nbsp;&nbsp;
+				<i class="bi bi-telephone"></i> &nbsp; <span class="sec-text">{{ current_user.phone }}</span>
+				<br/>
+				<br/>
+				{% if current_user.resume == '' %}
+					<p>Resume missing!</p>
+				{% else %}
+					<a id="view-resume" target="_blank" href="{{ url_for('static', filename='resumes/' + current_user.resume) }}">View Resume</a>
+				{% endif %}
+			</div>
+		</div>
+		<div id="edit-details" class="mt-4">
+			<h5> <i class="bi bi-pencil-square"></i> <b>Edit Profile</b></h5>
+			<div class="divider"></div>
+			<form method="POST" action="" enctype="multipart/form-data">
+				{{ form.hidden_tag() }}
+				<div class="mb-3 row">
+					<div class="col-md-8">
+						{{ form.email.label(class="form-label") }}
+						{% if form.email.errors %}
+							{{ form.email(class="form-control is-invalid") }}
+							<div class="invalid-feedback">
+								{% for error in form.email.errors %}
+									<span>{{ error }}</span>
+								{% endfor %}
+							</div>
+						{% else %}
+							{{ form.email(class="form-control") }}
+						{% endif %}
+					</div>
+					<div class="col-md-4">
+						{{ form.age.label(class="form-label") }}
+						{{ form.age(class="form-control") }}
+					</div>
+				</div>
+				<div class="mb-3">
+					{{ form.phone.label(class="form-label") }}
+					{% if form.phone.errors %}
+						{{ form.phone(class="form-control is-invalid") }}
 						<div class="invalid-feedback">
-							{% for error in form.email.errors %}
+							{% for error in form.phone.errors %}
 								<span>{{ error }}</span>
 							{% endfor %}
 						</div>
 					{% else %}
-						{{ form.email(class="form-control") }}
+						{{ form.phone(class="form-control") }}
 					{% endif %}
 				</div>
-				<div class="col-md-4">
-					{{ form.age.label(class="form-label") }}
-					{{ form.age(class="form-control") }}
-				</div>
-			</div>
-			<div class="mb-3">
-				{{ form.phone.label(class="form-label") }}
-				{% if form.phone.errors %}
-					{{ form.phone(class="form-control is-invalid") }}
-					<div class="invalid-feedback">
-						{% for error in form.phone.errors %}
-							<span>{{ error }}</span>
+				<div class="mb-3">
+					{{ form.profile_picture.label() }}
+					</br>
+					{{ form.profile_picture(class="form-control-file") }}
+					{% if form.profile_picture.errors %}
+						</br>
+						{% for error in form.profile_picture.errors %}
+							<span class="text-danger">{{ error }}</span>
 						{% endfor %}
-					</div>
-				{% else %}
-					{{ form.phone(class="form-control") }}
-				{% endif %}
-			</div>
-			<div class="mb-3">
-				{{ form.profile_picture.label() }}
-				</br>
-				{{ form.profile_picture(class="form-control-file") }}
-				{% if form.profile_picture.errors %}
+					{% endif %}
+				</div>
+				<div class="mb-3">
+					{{ form.resume.label() }}
 					</br>
-					{% for error in form.profile_picture.errors %}
-						<span class="text-danger">{{ error }}</span>
-					{% endfor %}
-				{% endif %}
-			</div>
-			<div class="mb-3">
-				{{ form.resume.label() }}
-				</br>
-				{{ form.resume(class="form-control-file") }}
-				{% if form.resume.errors %}
-					</br>
-					{% for error in form.resume.errors %}
-						<span class="text-danger">{{ error }}</span>
-					{% endfor %}
-				{% endif %}
-			</div>
-			<div class="mb-3">
-				{{ form.update(class="btn button-style") }}
-			</div>
-		</form>
+					{{ form.resume(class="form-control-file") }}
+					{% if form.resume.errors %}
+						</br>
+						{% for error in form.resume.errors %}
+							<span class="text-danger">{{ error }}</span>
+						{% endfor %}
+					{% endif %}
+				</div>
+				<div class="mb-3">
+					{{ form.update(class="btn button-style") }}
+				</div>
+			</form>
+		</div>
 	</div>
 </div>
 {% endblock content %}

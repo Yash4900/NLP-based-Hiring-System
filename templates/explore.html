@@ -1,20 +1,39 @@
 {% extends 'layout.html' %}
 {% block content %}
-<div class="container col-md-6 mt-5">
-	{% for job in jobs %}
-		<div class="job-card p-3 shadow-sm">
-			<h4><b><a class="job-role" href="#">{{ job.role }}</a><b></h4>
-			<p class="desc">{{ job.job_desc }}</p>
-			<div class="bottom">
-				<div>
-					<span><b>Deadline: </b></span>
-					<span id="date">{{ job.deadline.strftime('%Y-%m-%d') }}</span>
-				</div>
-				<div>
-					<a class="view-details" href="{{ url_for('position', job_id = job.id) }}">View Details</a>
-				</div>
+<div class="container col-md-6 mt-2">
+	<form action="" method="GET">
+		<div class="row my-3">
+			<div class="col-md-10">
+				<input type="text" name="query" class="form-control" placeholder="Search by title, keyword, location">
+			</div>
+			<div class="col-md-2">
+				<input class="btn button-style" type="submit" name="submit" value=" Search ">
 			</div>
 		</div>
-	{% endfor %}
+	</form>
+	{% if num_jobs == 0 %}
+		<div class="container col-md-10 empty">
+			<h5><b>No Results Found!</b></h5>			
+		</div>
+	{% else %}
+		{% for job in jobs %}
+			<div class="job-card p-3 shadow-sm">
+				<h4><b><a class="job-role" href="{{ url_for('position', job_id = job.id) }}">{{ job.role }}</a><b></h4>
+				<p class="desc">{{ job.job_desc }}</p>
+				<div class="bottom">
+					<div>
+						<span><b>Deadline: </b></span>
+						<span id="date">{{ job.deadline.strftime('%Y-%m-%d') }}</span>
+						&nbsp; &nbsp;
+						<span><b>Salary: </b></span>
+						<span id="date">{{ job.salary }}</span>
+					</div>
+					<div>
+						<a class="view-details" href="{{ url_for('position', job_id = job.id) }}">View Details</a>
+					</div>
+				</div>
+			</div>
+		{% endfor %}
+	{% endif %}
 </div>	
 {% endblock content %}

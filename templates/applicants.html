@@ -1,30 +1,46 @@
 {% extends 'layout.html' %}
 {% block content %}
-<div class="container bg-white p-3 col-md-8">
+<div class="container bg-white p-3 shadow-sm col-md-10">
 	<h4>Applications - {{ job.role }}</h4>
 	<div class="divider"></div>
-	<b><div class="row f-18 bg-light">
-		<div class="col-md-6">Candidate Info</div>
-		<div class="col-md-3">Profile Match</div>
-		<div class="col-md-3">Status</div>
+	<b><div class="head py-2 row f-18 bg-light">
+		<div class="col-md-1"></div>
+		<div class="col-md-3">Name</div>
+		<div class="col-md-2">
+			<i class="bi bi-envelope"></i> Email
+		</div>
+		<div class="col-md-2">
+			<i class="bi bi-telephone"></i> Phone
+		</div>
+		<div class="col-md-1">Age</div>
+		<div class="col-md-2">Profile Match</div>
+		<div class="col-md-1">Status</div>
 	</div></b>
 	{% for applicant in applicants %}
 		<div class="applicant-tile row my-4">
-			<div class="applicant-profile-pic col-md-2">
-				<img class="pic" src="{{ url_for('static', filename='profile_pictures/'+applicant['profile_picture']) }}" width="120px" >
-			</div>
-			<div class="applicant-info col-md-4">
-				<h5><b>{{ applicant['name'] }}</b></h5>
-				<p class="text-muted">{{ applicant['email'] }} - {{ applicant['age'] }}</p>
-				<a id="view-resume" target="_blank" href="{{ url_for('static', filename='resumes/' + applicant['resume']) }}">View Resume</a>
+			<div class="applicant-profile-pic col-md-1">
+				<img class="pic" src="{{ url_for('static', filename='profile_pictures/'+applicant['profile_picture']) }}" width="70px" >
 			</div>
 			<div class="col-md-3">
+					<h5><b>{{ applicant['name'] }}</b></h5>
+					<a id="view-resume" target="_blank" href="{{ url_for('static', filename='resumes/' + applicant['resume']) }}">View Resume</a>
+			</div>
+			<div class="col-md-2">
+				<p>{{ applicant['email'] }}</p>
+			</div>
+			<div class="col-md-2">
+				<p>{{ applicant['phone'] }}</p>
+			</div>
+			<div class="col-md-1">
+				<p>{{ applicant['age'] }}</p>
+			</div>
+			<div class="col-md-2">
 				<div class="progress-bar mt-2">
 					<div class="strength" style="width:{{applicant['strength']}}%;"></div>
 				</div>
 				<p>{{applicant['strength']}} %</p>
 			</div>
-			<div class="col-md-3">
+			<div class="col-md-1">
 				{% if applicant['status'] == 'Pending' %}
 				<button class="btn button-style" onclick="set_id({{applicant['id'] }})" data-bs-toggle="modal" data-bs-target="#shortlistModal">
 					Shortlist

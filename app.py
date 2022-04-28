@@ -3,7 +3,7 @@ import time
 import datetime
 from PIL import Image
 from flask import Flask, url_for, render_template, flash, redirect, request
-from forms import RegisterForm, LoginForm, AddJobForm, UpdateProfileForm
+from forms import RegisterForm, LoginForm, AddJobForm, UpdateProfileForm, ChangePasswordForm
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager, UserMixin, login_user, logout_user, current_user, login_required
@@ -72,8 +72,14 @@ class Job(db.Model):
 @app.route('/')
 @app.route('/explore')
 def explore():
-	jobs = Job.query.all()
-	return render_template('explore.html', title='Explore', jobs=jobs)
+	keyword = request.args.get('query')
+	if keyword != None and keyword != '':
+		jobs = Job.query.filter(Job.role.contains(keyword))
+		num_jobs = jobs.count()
+	else:
+		jobs = Job.query.all()
+		num_jobs = len(jobs)
+	return render_template('explore.html', title='Explore', jobs = jobs, num_jobs = num_jobs)
 
 
 @app.route('/register', methods = ['GET', 'POST'])
@@ -185,7 +191,8 @@ def account():
 @login_required
 def applications(user_id):
 	jobs = current_user.applied_at
-	return render_template('explore.html', title='My Applications', jobs=jobs)
+	num_applications = len(jobs)
+	return render_template('my-applications.html', title='My Applications', jobs=jobs, num_applications = num_applications)
 
 @app.route('/position/<int:job_id>')
 def position(job_id):
@@ -206,7 +213,7 @@ def cosine_similarity(x, y):
 def applicants(job_id):
 	job = Job.query.get(job_id)
 	applicants = job.applicants
-
+	total_applicants = len(applicants)
 	applicants_list = []
 	for index, applicant in enumerate(applicants):
 		user_job_row = db.session.query(user_job).filter_by(user_id = applicant.id, job_id = job_id).first()
@@ -215,15 +222,15 @@ def applicants(job_id):
 			'name': applicant.full_name,
 			'age': applicant.age,
 			'email': applicant.email,
+			'phone': applicant.phone,
 			'profile_picture': applicant.profile_picture,
 			'resume': applicant.resume,
 			'strength': user_job_row.match,
 			'status': user_job_row.status
 		}
-		print(dictionary['strength'])
 		applicants_list.append(dictionary)
 
-	return render_template('applicants.html', applicants = applicants_list, job = job)
+	return render_template('applicants.html', applicants = applicants_list, job = job, total_applicants	 = total_applicants)
 
 @app.route('/shortlist/<int:job_id>', methods = ['POST'])
 def shortlist(job_id):
@@ -290,6 +297,19 @@ def apply(job_id):
 	flash(f'You have successfully applied for {job.role} position!', 'success')
 	return redirect(url_for('explore'))
 
+@app.route('/change-password', methods = ['GET', 'POST'])
+@login_required
+def change_password():
+	form = ChangePasswordForm()
+	if form.validate_on_submit():
+		if bcrypt.check_password_hash(current_user.password, form.old_password.data):
+			hashed_password = bcrypt.generate_password_hash(form.new_password.data).decode('utf-8')
+			current_user.password = hashed_password
+			db.session.commit()
+			flash('Password was updated successfully!', 'success')
+		else:
+			flash('Incorrect old password!', 'danger')
+	return render_template('change-password.html', title = 'Change Password', form = form)
 
 if (__name__ == '__main__'):
 	app.run(debug = True)

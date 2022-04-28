@@ -105,7 +105,9 @@ body {
 
 .job-role {
 	text-decoration: none;
-	color: #151515;
+	color: #101010;
+	font-weight: 600;
+	font-size: 20px;
 }
 
 .progress-bar {
@@ -122,12 +124,46 @@ body {
 	border-left: 1px solid #eeeeee;
 }
 
-.status, .image {
+.status, .image, .empty, .applicant-profile-pic {
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
+	align-items: center;
 }
 
 .w-500 {
 	font-weight: 500;
+}
+
+.menu {
+	font-size: 17px;
+	height: 100vh;
+	background-color: #ffffff;
+}
+
+a {
+	text-decoration: none;
+	font-size: 16px;
+}
+
+.link-active {
+	color: #ffffff;
+	font-weight: 600;
+}
+
+.link-inactive {
+	color: #000000;
+}
+
+.menu-item:hover {
+	cursor: pointer;
+}
+
+.menu-item-active {
+	background-color: #5f788abb;
+	color: #ffffff;
+}
+
+.sec-text {
+	color: #616161;
 }
