@@ -4,7 +4,7 @@
 	<form action="" method="GET">
 		<div class="row my-3">
 			<div class="col-md-10">
-				<input type="text" name="query" class="form-control" placeholder="Search by title, keyword, location">
+				<input type="text" name="query"  value="{{ value }}" class="form-control" placeholder="Search by title, keyword, location">
 			</div>
 			<div class="col-md-2">
 				<input class="btn button-style" type="submit" name="submit" value=" Search ">
@@ -17,9 +17,13 @@
 		</div>
 	{% else %}
 		{% for job in jobs %}
-			<div class="job-card p-3 shadow-sm">
+			<div class="job-card p-3 my-3 shadow-sm">
 				<h4><b><a class="job-role" href="{{ url_for('position', job_id = job.id) }}">{{ job.role }}</a><b></h4>
 				<p class="desc">{{ job.job_desc }}</p>
+				<div>
+					<span><b>Location: </b></span>
+					<span id="date">{{ job.work_location }}</span>
+				</div>
 				<div class="bottom">
 					<div>
 						<span><b>Deadline: </b></span>

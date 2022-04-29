@@ -74,12 +74,14 @@ class Job(db.Model):
 def explore():
 	keyword = request.args.get('query')
 	if keyword != None and keyword != '':
-		jobs = Job.query.filter(Job.role.contains(keyword))
+		jobs = Job.query.filter(Job.role.contains(keyword) | Job.work_location.contains(keyword))
 		num_jobs = jobs.count()
+		value = keyword
 	else:
 		jobs = Job.query.all()
 		num_jobs = len(jobs)
-	return render_template('explore.html', title='Explore', jobs = jobs, num_jobs = num_jobs)
+		value = ''
+	return render_template('explore.html', title='Explore', jobs = jobs, num_jobs = num_jobs, value = value)
 
 
 @app.route('/register', methods = ['GET', 'POST'])
@@ -229,6 +231,7 @@ def applicants(job_id):
 			'status': user_job_row.status
 		}
 		applicants_list.append(dictionary)
+	applicants_list = sorted(applicants_list, key = lambda i: i['strength'], reverse = True)
 
 	return render_template('applicants.html', applicants = applicants_list, job = job, total_applicants	 = total_applicants)
 
